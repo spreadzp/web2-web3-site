@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.iframe-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.iframe-content {
+  width: 100%;
+  height: 100%;
+  border: none; /* Remove border if not needed */
+}
+.dropdown-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-list {
+  position: relative;
+  z-index: 1;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 150px; /* Fixed width for the dropdown list */
+  display: none; /* Hide the list by default */
+}
+
+.dropdown-list.open {
+  display: block; /* Show the list when open */
+}
+
+.dropdown-list li {
+  position: relative; /* Make the list items positioned relatively */
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  color: black;
+  font-size: 14px;
+}
+
+.dropdown-list li:last-child {
+  border-bottom: none;
+}
+
+.item-icon {
+  margin-right: 10px;
+}
+
+.item-nftId{
+  margin-left: 10px;
+}
+.item-description {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: calc(100% + 10px); /* Position the description to the right of the list item */
+  width: 200px; /* Adjust width as needed */
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.dropdown-list li:hover .item-description {
+  display: block;
+  top: 0;
+  left: 100%; /* Adjust the position to be next to the hovered item */
+}

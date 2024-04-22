@@ -1,0 +1,58 @@
+{
+  "name": "with-next-app",
+  "private": true,
+  "version": "0.0.24",
+  "scripts": {
+    "dev": "next dev ",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apify/tsconfig": "^0.1.0",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@crawlee/cheerio": "^3.8.1",
+    "@rainbow-me/rainbowkit": "^1.3.3",
+    "@tokenbound/sdk": "^0.3.1",
+    "@types/puppeteer": "^7.0.4",
+    "apify": "^3.1.16",
+    "babel-loader": "^9.1.3",
+    "browserslist": "^4.23.0",
+    "canvas": "^2.11.2",
+    "crawlee": "^3.8.1",
+    "ethers": "^6.11.1",
+    "next": "^14.0.4",
+    "original-fs": "^1.2.0",
+    "pino-pretty": "^10.3.1",
+    "puppeteer": "^22.3.0",
+    "puppeteer-tsd": "^0.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
+    "react-iframe": "^1.8.5",
+    "viem": "~0.3.36",
+    "wagmi": "^1.0.6",
+    "yargs": "^17.7.2",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.3",
+    "@types/react": "^18.2.43",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.15.0",
+    "eslint-config-next": "^14.0.4",
+    "next": "^14.0.4",
+    "postcss": "^8.4.33",
+    "prettier": "^2.8.8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.0.4",
+    "webpack": "^5.90.3"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "browser": {
+    "./lib/adapters/http.js": false
+  }
+}
