@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   http,
   createWalletClient,
@@ -10,21 +10,21 @@ import {
 } from "viem";
 import {
   bscTestnet,
-  mainnet,
-  sepolia,
-  goerli,
-  optimismGoerli,
+  // mainnet,
+  // sepolia,
+  // goerli,
+  // optimismGoerli,
 } from "viem/chains";
 import { type TBAccountParams, TokenboundClient } from "@tokenbound/sdk";
 //import { type TBAccountParams } from "@tokenbound/sdk/dist/src/TokenboundClient";
 import { useAccount } from "wagmi";
-import Iframe from "react-iframe";
-import * as NFT_CONTRACT from "../app/ABIs/nft.sol.json";
+// import Iframe from "react-iframe";
+// import * as NFT_CONTRACT from "../app/ABIs/nft.sol.json";
 import * as ACCOUNT_CONTRACT from "../app/ABIs/Account.sol/Account.json";
 import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/AccountRegistry.sol/AccountRegistry.json";
-import { proxyUrl } from "../hooks/proxyUrl";
-import { FiBox } from "react-icons/fi";
-import { FaBars } from "react-icons/fa";
+// import { proxyUrl } from "../hooks/proxyUrl";
+// import { FiBox } from "react-icons/fi";
+// import { FaBars } from "react-icons/fa";
 import { ethers } from "ethers";
 import { getFullBalance } from "../hooks/parserScan";
 import { getProvider } from "../hooks/useEthersSigner";
@@ -44,42 +44,36 @@ export default function Tbd() {
     selectedNft,
     setPublicClient,
     walletClient,
-    tokenboundClient,
+    tokenBoundClient,
   } = useTbaSiteStore();
 
   const { isConnected, address } = useAccount();
   const browserWeb3Provider =
     typeof window !== "undefined" ? window.ethereum : null;
-  // const walletClient = createWalletClient({
-  //   account: address,
-  //   chain: bscTestnet, // optimismGoerli,
-  //   transport: custom(browserWeb3Provider!),
-  //    //transport: http(),
-  // });
 
-  const initMenu: Nft[] = [
-    {
-      address: "0xfd8D7f61C16C65025b8308d97151eaa904eBB7E1",
-      nftId: "0",
-      chainId: "97",
-      title: "title 1",
-      description: "description 1",
-    },
-    {
-      address: "0xF4F3A96C24117582316197C4bf0af6c7a2A9571D",
-      nftId: "0",
-      chainId: "97",
-      title: "title 2",
-      description: "description 2",
-    },
-    {
-      address: "0xDDBABEAef71416c4273928Aa88b661DddCce33f5",
-      nftId: "2",
-      chainId: "97",
-      title: "title 3",
-      description: "description 3",
-    },
-  ];
+  const initMenu: Nft[] = [];
+  //   {
+  //     address: "0xfd8D7f61C16C65025b8308d97151eaa904eBB7E1",
+  //     nftId: "0",
+  //     chainId: "97",
+  //     title: "title 1",
+  //     description: "description 1",
+  //   },
+  //   {
+  //     address: "0xF4F3A96C24117582316197C4bf0af6c7a2A9571D",
+  //     nftId: "0",
+  //     chainId: "97",
+  //     title: "title 2",
+  //     description: "description 2",
+  //   },
+  //   {
+  //     address: "0xDDBABEAef71416c4273928Aa88b661DddCce33f5",
+  //     nftId: "2",
+  //     chainId: "97",
+  //     title: "title 3",
+  //     description: "description 3",
+  //   },
+  // ];
 
   if (!client) {
     client = createPublicClient({
@@ -88,14 +82,6 @@ export default function Tbd() {
     });
     setPublicClient(client);
   }
-
-  // publicClientRPCUrl: process.env.NEXT_PUBLIC_GOERLI_RPC_URL,
-  // const tokenboundClient = new TokenboundClient({
-  //   walletClient,
-  //   chain: bscTestnet,
-  //   implementationAddress: process.env.NEXT_PUBLIC_BSC_TESTNET_IMPL as `0x${string}`,
-  //   registryAddress: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`
-  // }); // ,  publicClient: client
 
   const [retrievedAccount, setRetrievedAccount] = useState<string>("");
 
@@ -132,8 +118,9 @@ export default function Tbd() {
       });
     }
     try {
-      //if(!publicClient) return
-      //const account = tokenboundClient.getAccount(TBAccount);
+      if (!publicClient) return;
+
+      // const account = tokenboundClient.getAccount(TBAccount);
       // const currentOwner = await publicClient.readContract({
       //   address: process.env.NEXT_PUBLIC_BSC_TESTNET_IMPL as `0x${string}`,
       //   abi: ACCOUNT_CONTRACT.abi,
@@ -141,7 +128,7 @@ export default function Tbd() {
       //   args: [],
       // });
       // console.log("🚀 ~ getAccount ~ currentOwner:", currentOwner)
-
+      debugger;
       const account = await publicClient.readContract({
         address: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
         abi: ACCOUNT_REGISTRY_CONTRACT.abi,
@@ -157,6 +144,7 @@ export default function Tbd() {
         args: [],
       });
       console.log("🚀 ~ getAccount ~ currentOwner:", currentOwner);
+      debugger;
       const isAuthorized = await publicClient.readContract({
         address: account as `0x${string}`,
         abi: ACCOUNT_CONTRACT.abi,
@@ -239,14 +227,14 @@ export default function Tbd() {
       //   "tokenboundClient.publicClient.chain()",
       //   tokenboundClient.publicClient.chain
       // );
-      // const isDeployed = await tokenboundClient.checkAccountDeployment({
-      //   accountAddress: account,
-      // });
-      // console.log("🚀 ~ getAccount ~ isDeployed:", isDeployed);
+      const isDeployed = await tokenBoundClient.checkAccountDeployment({
+        accountAddress: account as `0x${string}`,
+      });
+      console.log("🚀 ~ getAccount ~ isDeployed:", isDeployed);
       setError({ isError: false, reason: "" });
     } catch (err) {
       console.error(err);
-      setRetrievedAccount("");
+      //setRetrievedAccount("");
       setError({
         isError: true,
         reason: JSON.stringify(err),
@@ -261,9 +249,9 @@ export default function Tbd() {
   };
 
   const createAccount = useCallback(async () => {
-    if (!tokenboundClient || !address) return;
+    if (!tokenBoundClient || !address) return;
     debugger;
-    const createdAccount = await tokenboundClient.createAccount({
+    const createdAccount = await tokenBoundClient.createAccount({
       tokenContract: TBAccount.tokenContract,
       tokenId: TBAccount.tokenId,
       implementationAddress: process.env
@@ -273,16 +261,16 @@ export default function Tbd() {
     });
     console.log(`new account: ${createdAccount}`);
     checkBalance();
-  }, [tokenboundClient, TBAccount]);
+  }, [tokenBoundClient, TBAccount]);
 
   const checkBalance = useCallback(async () => {
     if (retrievedAccount as `0x${string}`) {
       debugger;
-      const balance = await tokenboundClient.getNFT({
+      const balance = await tokenBoundClient.getNFT({
         accountAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`,
       });
       console.log("🚀 ~ checkBalance ~ balance:", balance);
-      const isDeployed = await tokenboundClient.checkAccountDeployment({
+      const isDeployed = await tokenBoundClient.checkAccountDeployment({
         accountAddress: retrievedAccount as `0x${string}`,
         // process.env
         //   .NEXT_PUBLIC_TOKEN_BOUND_ACCOUNT as `0x${string}`,
@@ -293,49 +281,33 @@ export default function Tbd() {
 
       setBalanceNft(balance);
       if (tbaBalance.erc721s?.length > 0) {
+        console.log("🚀 ~ checkBalance ~ tbaBalance:", tbaBalance);
       }
     }
-  }, [retrievedAccount, tokenboundClient]);
-
-  // const DropdownMenu = ({ menuItems}: { menuItems: Nft[] } ) => {
-  //   const [isOpen, setIsOpen] = useState(false);
-
-  //   const toggleMenu = () => {
-  //     setIsOpen(!isOpen);
-  //   };
-  //   return (
-  //     <div className="dropdown-menu" >
-  //       <div className="dropdown-toggle" onClick={toggleMenu}>
-  //       <FaBars color="red" size={20}/>
-  //       </div>
-  //       {isOpen && (
-  //         <ul className={`dropdown-list ${isOpen ? 'open' : ''}`}>
-  //           {menuItems.map((menuItem, index) => (
-  //             <li key={index} onClick={() => getPageFromNftUri(menuItem)}>
-  //               <div className="item-icon">{menuItem.chainId}</div>
-  //               <div className="item-title">{menuItem.title}</div>
-  //               <div className="item-nftId">{menuItem.nftId}</div>
-  //               <div className="item-description">{menuItem.description}</div>
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       )}
-  //     </div>
-  //   );
-  // };
+  }, [retrievedAccount, tokenBoundClient]);
+  useEffect(() => {
+    if (tbaBalance.erc721s?.length > 0) {
+      tbaBalance.erc721s.map((erc721) => {
+        const menuItem: Nft = {
+          address: erc721.contractAddress,
+          nftId: `${erc721.nftId}`,
+          chainId: "97",
+          title: erc721.symbol,
+          description: erc721.name,
+          link: erc721.uri,
+        };
+        menu.push(menuItem);
+      });
+    }
+  }, [tbaBalance]);
   return (
     <>
-      <WalletInstallation />
       {isConnected && (
         <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#76004f] to-[#15162c]">
           <div className="container flex flex-col gap-12 px-4 py-16 ">
             <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-[3rem]">
-              <DropdownMenu menuItems={menu} />
-              Check{" "}
-              <span className="text-[hsl(187,100%,68%)]">
-                tokenbound account
-              </span>{" "}
-              for any NFT
+              {menu.length > 0 && <DropdownMenu menuItems={menu} />}
+
             </h1>
             <div className="rounded-xl border-2 border-white p-4 text-white">
               Use the{" "}
@@ -401,6 +373,7 @@ export default function Tbd() {
                     )}
                   </pre>
                   <div> Balance TBA</div>
+                  <pre>{JSON.stringify(tbaBalance)}</pre>
                   {tbaBalance.erc721s?.length > 0 && (
                     <div>
                       <div>ERC20 Balance</div>

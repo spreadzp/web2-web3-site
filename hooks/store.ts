@@ -32,8 +32,8 @@ interface ITbaSite {
   setPublicClient: (client: PublicClient) => void;
   selectedNft: Nft;
   setSelectedNft: (nft: Nft) => void;
-  tokenboundClient: TokenboundClient;
-  setTokenboundClient: (client: TokenboundClient) => void;
+  tokenBoundClient: TokenboundClient;
+  setTokenBoundClient: (client: TokenboundClient) => void;
   walletClient: any;
   setWalletClient: (client: any) => void;
 }
@@ -82,9 +82,9 @@ export const useTbaSiteStore = create<ITbaSite>((set) => ({
   setPublicClient: (client: PublicClient) => set({ publicClient: client }),
   selectedNft: {} as Nft,
   setSelectedNft: (nft: Nft) => set({ selectedNft: nft }),
-  tokenboundClient: {} as TokenboundClient,
-  setTokenboundClient: (client: TokenboundClient) =>
-    set({ tokenboundClient: client }),
+  tokenBoundClient: {} as TokenboundClient,
+  setTokenBoundClient: (client: TokenboundClient) =>
+    set({ tokenBoundClient: client }),
   walletClient: {} as any,
   setWalletClient: (client: any) => set({ walletClient: client }),
 }));
