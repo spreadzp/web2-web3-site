@@ -1,24 +1,21 @@
 "use server";
 
 import { ethers } from "ethers";
-// import { getTransactionReceipt } from "viem/dist/types/actions/public/getTransactionReceipt";
 import { getProvider } from "./useEthersSigner";
-// import { proxyUrl } from "./proxyUrl";
-// import { Actor, Dataset } from "apify";
 import { PuppeteerCrawler } from "crawlee";
 import type { Balance } from "./store";
-//import puppeteer from "puppeteer";
 
 export const fetchPageContent = async (
   url: string
   //actor: Actor
 ): Promise<[string[]]> => {
   //const actor = new Actor();
+  let crawler: PuppeteerCrawler | null = null;
   try {
     let addressesTokens: string[] = [];
-    const crawler = new PuppeteerCrawler({
+    crawler = new PuppeteerCrawler({
       async requestHandler({ page }) {
-        //page.goto(url, {timeout:  60_000})
+        //await page.goto(url)
         const hrefs = await page.evaluate(() => {
           const links = Array.from(
             document.querySelectorAll('a[href^="/token/"]')
@@ -59,6 +56,7 @@ export const fetchPageContent = async (
     console.log("err", err);
     return [[]];
   } finally {
+    crawler = null
     // await actor.exit(); // Call the exit function from the actor instance
   }
 };
@@ -170,7 +168,7 @@ async function getTokensInfo(
         try {
           //
           //while (false) {}
-        } catch (err) {}
+        } catch (err) { }
         const uri = await contractInstance.tokenURI(0);
         const ownerAddress = await contractInstance.ownerOf(0);
         console.log("🚀 ~ ownerAddress:", ownerAddress);

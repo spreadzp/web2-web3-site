@@ -1,7 +1,9 @@
+import { SocialNetworks } from "./SocialNetworks";
+
 export default function Footer() {
     return (
-        <footer className="bg-gray-800 text-white text-center p-4">
-            <div>© 2024 Caravan LTD</div>
+        <footer className="bg-gradient-to-b from-[#6535ac] to-[#6c11b2] text-black text-center p-4">
+            <SocialNetworks />
         </footer>
     );
 }

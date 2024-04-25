@@ -4,6 +4,7 @@ import type { Nft } from "../interfaces/components.itypes";
 import { proxyUrl } from "../hooks/proxyUrl";
 import { useTbaSiteStore } from "../hooks/store";
 import * as NFT_CONTRACT from "../app/ABIs/nft.sol.json";
+import { BnbIcon, BscIcon, EthIcon, HomeIcon, Item1Icon, getIconByName } from "./Icons";
 
 export const DropdownMenu = ({ menuItems }: { menuItems: Nft[] }) => {
   const {
@@ -35,12 +36,33 @@ export const DropdownMenu = ({ menuItems }: { menuItems: Nft[] }) => {
         } else {
           alert("No metadata found for this NFT");
         }
+      } else {
+        setHtmlForFrame(``);
       }
     },
     [NFT_CONTRACT.abi, publicClient, selectedNft]
   );
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+  const getChainIcon = (chainId: string | undefined) => {
+    const chainName = chainId === '97' ? 'Bsc' : 'Home'
+    let icon = getIconByName(chainName)
+    // const chainIdNumbered = Number(chainId);
+    // if (chainIdNumbered) {
+
+    //   if ([97].includes(chainIdNumbered)) {
+    //     console.log("🚀 ~ getChainIcon ~ chainIdNumbered:", chainIdNumbered)
+    //     icon = <BscIcon />;
+    //   }
+    //   if ([1].includes(chainIdNumbered)) {
+    //     icon = <EthIcon />;
+    //   }
+    //   else {
+    //     icon = <HomeIcon />
+    //   }
+    // }
+    return icon;
   };
   return (
     <div className="dropdown-menu">
@@ -60,7 +82,7 @@ export const DropdownMenu = ({ menuItems }: { menuItems: Nft[] }) => {
               key={index}
               onClick={() => getPageFromNftUri(menuItem)}
             >
-              <div className="item-icon">{menuItem.chainId}</div>
+              {getChainIcon(menuItem.chainId)}
               <div className="item-title">{menuItem.title}</div>
               <div className="item-nftId">{menuItem.nftId}</div>
               <div className="item-description">{menuItem.description}</div>

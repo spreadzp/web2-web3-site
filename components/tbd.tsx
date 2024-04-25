@@ -32,6 +32,7 @@ import { useTbaSiteStore } from "../hooks/store";
 import type { Nft } from "../interfaces/components.itypes";
 import { DropdownMenu } from "./dropdownMenu";
 import { WalletInstallation } from "../hooks/walletInstallation";
+import { BscIcon, EthIcon, PolygonIcon, getIconByName } from "./Icons";
 let client: any;
 export default function Tbd() {
   const {
@@ -298,131 +299,129 @@ export default function Tbd() {
         };
         menu.push(menuItem);
       });
+      const menuItem: Nft = {
+        chainId: "",
+        title: 'return to tba',
+        description: 'Click here to return to TBA',
+        link: '',
+      };
+      menu.push(menuItem);
     }
   }, [tbaBalance]);
   return (
-    <>
-      {isConnected && (
-        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#76004f] to-[#15162c]">
-          <div className="container flex flex-col gap-12 px-4 py-16 ">
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-[3rem]">
-              {menu.length > 0 && <DropdownMenu menuItems={menu} />}
+    <div className=" bg-gradient-to-b from-[#76004f] to-[#4b4fa6]">
+      {menu.length > 0 && <DropdownMenu menuItems={menu} />}
 
-            </h1>
-            <div className="rounded-xl border-2 border-white p-4 text-white">
-              Use the{" "}
-              <a
-                // href="https://tokenbound.org"
-                target="_blank"
-                className="underline"
+      <main className=" min-h-screen flex-col items-center justify-center ">
+        {htmlForFrame === "" && isConnected && (<div className="container flex flex-col px-4 py-16 ">
+
+          <div className="grid grid-cols-1 gap-8 text-white ">
+            <div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  getAccount();
+                }}
+                className="grid grid-cols-1 gap-4 md:grid-cols-2"
               >
-                tokenbound explorer ↗️
-              </a>{" "}
-              to explore NFTs and their wallets.
-            </div>
-            <div className="grid grid-cols-1 gap-8 text-white md:grid-cols-2">
-              <div>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    getAccount();
-                  }}
-                  className="grid grid-cols-1 gap-4 md:grid-cols-2"
-                >
-                  <label htmlFor="nftContract">NFT Contract</label>
-                  <input
-                    type="text"
-                    className="h-fit rounded-lg bg-slate-300 p-2 text-black"
-                    id="nftContract"
-                    onChange={(event) =>
-                      setTBAccount({
-                        ...TBAccount,
-                        tokenContract: event.target
-                          .value as TBAccountParams["tokenContract"],
-                      })
-                    }
-                    value={TBAccount.tokenContract}
-                  />
-                  <label htmlFor="nftTokenId">Token ID</label>
-                  <input
-                    type="text"
-                    className="h-fit rounded-lg bg-slate-300 p-2 text-black"
-                    id="nftTokenId"
-                    onChange={(event) =>
-                      setTBAccount({
-                        ...TBAccount,
-                        tokenId: event.target.value,
-                      })
-                    }
-                    value={TBAccount.tokenId}
-                  />
-                  <button
-                    type="submit"
-                    className="col-span-2 h-fit self-end rounded-lg bg-slate-100 p-2 text-black"
-                  >
-                    Check
-                  </button>
-                </form>
+                <label htmlFor="nftContract">NFT Contract</label>
+                <input
+                  type="text"
+                  className="h-fit rounded-lg bg-slate-300 p-2 text-black"
+                  id="nftContract"
+                  onChange={(event) =>
+                    setTBAccount({
+                      ...TBAccount,
+                      tokenContract: event.target
+                        .value as TBAccountParams["tokenContract"],
+                    })
+                  }
+                  value={TBAccount.tokenContract}
+                />
 
-                <div className="grid grid-cols-1 gap-4 font-mono text-white">
-                  <pre className="w-full overflow-x-auto">
-                    {JSON.stringify(
-                      { ...TBAccount, retrievedAccount, error },
-                      null,
-                      2
-                    )}
-                  </pre>
-                  <div> Balance TBA</div>
-                  <pre>{JSON.stringify(tbaBalance)}</pre>
-                  {tbaBalance.erc721s?.length > 0 && (
-                    <div>
-                      <div>ERC20 Balance</div>
-                      <pre>{JSON.stringify(tbaBalance.erc20s)}</pre>
-                      <div>NFTs Balance</div>
-                      <pre>{JSON.stringify(tbaBalance.erc721s)}</pre>
-                      <div>Coin Balance</div>
-                      <pre>{JSON.stringify(tbaBalance.ethBalance)}</pre>
-                    </div>
+                <label htmlFor="nftTokenId">Token ID</label>
+                <input
+                  type="text"
+                  className="h-fit rounded-lg bg-slate-300 p-2 text-black"
+                  id="nftTokenId"
+                  onChange={(event) =>
+                    setTBAccount({
+                      ...TBAccount,
+                      tokenId: event.target.value,
+                    })
+                  }
+                  value={TBAccount.tokenId}
+                />
+                <button
+                  type="submit"
+                  className="col-span-2 h-fit self-end rounded-lg bg-slate-100 p-2 text-black"
+                >
+                  Check
+                </button>
+              </form>
+
+              <div className="grid grid-cols-1 gap-4 font-mono text-white">
+                <pre className="w-full overflow-x-auto">
+                  {JSON.stringify(
+                    { ...TBAccount, retrievedAccount, error },
+                    null,
+                    2
                   )}
-                  <pre className="w-full overflow-x-auto">
-                    {JSON.stringify(balanceNft)}
-                  </pre>
-                  <button
-                    type="button"
-                    className="rounded-lg bg-slate-100 p-2 text-black"
-                    onClick={resetAccount}
-                  >
-                    Reset
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-lg bg-slate-100 p-2 text-black"
-                    onClick={() => createAccount()}
-                  >
-                    createAccount
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-lg bg-slate-100 p-2 text-black"
-                    onClick={() => checkBalance()}
-                  >
-                    Check balance
-                  </button>
-                </div>
-              </div>
-              <div className="iframe-container">
-                {htmlForFrame !== "" && (
-                  <iframe
-                    srcDoc={htmlForFrame}
-                    title="Remote Content"
-                    className="iframe-content"
-                  />
+                </pre>
+                <div> Balance TBA</div>
+                <pre>{JSON.stringify(tbaBalance)}</pre>
+                {tbaBalance.erc721s?.length > 0 && (
+                  <div>
+                    <div>ERC20 Balance</div>
+                    <pre>{JSON.stringify(tbaBalance.erc20s)}</pre>
+                    <div>NFTs Balance</div>
+                    <pre>{JSON.stringify(tbaBalance.erc721s)}</pre>
+                    <div>Coin Balance</div>
+                    <pre>{JSON.stringify(tbaBalance.ethBalance)}</pre>
+                  </div>
                 )}
+                <pre className="w-full overflow-x-auto">
+                  {JSON.stringify(balanceNft)}
+                </pre>
+                <button
+                  type="button"
+                  className="rounded-lg bg-slate-100 p-2 text-black"
+                  onClick={resetAccount}
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg bg-slate-100 p-2 text-black"
+                  onClick={() => createAccount()}
+                >
+                  createAccount
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg bg-slate-100 p-2 text-black"
+                  onClick={() => checkBalance()}
+                >
+                  Check balance
+                </button>
               </div>
             </div>
+
           </div>
-        </main>
-      )}
-    </>
+
+        </div>)}
+        <div className=" container  ">
+          {htmlForFrame !== "" && (
+            <iframe
+              srcDoc={htmlForFrame}
+              title="Remote Content"
+              className="iframe-content"
+            />
+          )}
+        </div>
+      </main>
+
+
+    </div>
   );
 }

@@ -1,7 +1,7 @@
-
+'use client';
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { BurgerIcon } from "./Icons";
+import { getIconByName } from "./Icons";
 import ExternalMenu from "./ExternalMenu";
 
 export default function Header() {
@@ -12,20 +12,17 @@ export default function Header() {
     return (
         <header className="  text-white p-4 w-full ">
             <div className="container mx-auto flex place-items-center justify-between">
-                {/* Burger icon */}
                 <button onClick={toggleMenu}>
-                    <BurgerIcon />
+                    {getIconByName('Burger')}
                 </button>
-                {/* Site name */}
                 <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-[3rem]">
 
-                    Check{" "}
+
                     <span className="text-[hsl(187,100%,68%)]">
-                        tokenbound account
+                        Tokenbound account
                     </span>{" "}
                     for any NFT
                 </h1>
-                {/* Connect button */}
                 <ConnectButton />
             </div>
             <ExternalMenu
