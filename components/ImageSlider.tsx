@@ -2,6 +2,7 @@ import React from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Image from 'next/image';
 
 const ImageSlider: React.FC = () => {
     const settings = {
@@ -18,21 +19,21 @@ const ImageSlider: React.FC = () => {
         <div className="image-slider">
             <Slider {...settings}>
                 <div>
-                    <img src="https://random.imagecdn.app/1500/150" alt="Image 1" />
+                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 1" width={1500} height={350} />
                 </div>
                 <div>
-                    <img src="https://random.imagecdn.app/1500/150" alt="Image 2" />
+                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 2" width={1500} height={350} />
                 </div>
                 <div>
-                    <img src="https://random.imagecdn.app/1500/150" alt="Image 3" />
+                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 3" width={1500} height={350} />
                 </div>
                 <div>
-                    <img src="https://random.imagecdn.app/1500/150" alt="Image 4" />
+                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 4" width={1500} height={350} />
                 </div>
                 <div>
-                    <img src="https://random.imagecdn.app/1500/150" alt="Image 5" />
+                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 5" width={1500} height={350} />
                 </div>
-                {/* Add more slides as needed */}
+
             </Slider>
         </div>
     );

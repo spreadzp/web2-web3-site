@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface PosterProps {
     title: string;
     description: string;
@@ -9,7 +11,7 @@ const Poster: React.FC<PosterProps> = ({ title, description, imageUrl }) => {
         <div className="poster">
             <div className="poster-content">
                 <div className="poster-image-container">
-                    <img src={imageUrl} alt={title} className="poster-image" />
+                    <Image src={imageUrl} alt={title} className="poster-image" width={1500} height={350} />
                 </div>
                 <div className="poster-description">
                     <h2>{title}</h2>

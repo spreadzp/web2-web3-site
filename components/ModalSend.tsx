@@ -1,10 +1,15 @@
 import { useState } from "react";
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (data: { address: string; amount: string }) => void;
+}
 
-export const Modal = ({ isOpen, onClose, onSubmit }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [address, setAddress] = useState('');
     const [amount, setAmount] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
         onSubmit({ address, amount });
         onClose();

@@ -17,7 +17,7 @@ const Table: React.FC<TableProps> = ({ data, onBuyClick }) => {
                     <tr>
                         {headers.map((header, index) => (
                             <th key={index} className="border px-4 py-2">
-                                {header}
+                                {header.charAt(0).toUpperCase() + header.slice(1)}
                             </th>
                         ))}
                         {onBuyClick && <th className="border px-4 py-2">Buy offer</th>}

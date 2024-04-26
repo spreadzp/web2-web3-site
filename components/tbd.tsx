@@ -1,12 +1,8 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  http,
-  createWalletClient,
   createPublicClient,
   custom,
-  parseAbi,
-  type PublicClient,
 } from "viem";
 import {
   bscTestnet,
@@ -15,34 +11,23 @@ import {
   // goerli,
   // optimismGoerli,
 } from "viem/chains";
-import { type TBAccountParams, TokenboundClient } from "@tokenbound/sdk";
-//import { type TBAccountParams } from "@tokenbound/sdk/dist/src/TokenboundClient";
+import { type TBAccountParams } from "@tokenbound/sdk";
 import { useAccount } from "wagmi";
-// import Iframe from "react-iframe";
-// import * as NFT_CONTRACT from "../app/ABIs/nft.sol.json";
 import * as ACCOUNT_CONTRACT from "../app/ABIs/Account.sol/Account.json";
 import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/AccountRegistry.sol/AccountRegistry.json";
-// import { proxyUrl } from "../hooks/proxyUrl";
-// import { FiBox } from "react-icons/fi";
-// import { FaBars } from "react-icons/fa";
 import { ethers } from "ethers";
 import { getFullBalance } from "../hooks/parserScan";
 import { getProvider } from "../hooks/useEthersSigner";
 import { useTbaSiteStore } from "../hooks/store";
 import type { Nft } from "../interfaces/components.itypes";
 import { DropdownMenu } from "./dropdownMenu";
-import { WalletInstallation } from "../hooks/walletInstallation";
-import { BscIcon, EthIcon, PolygonIcon, getIconByName } from "./Icons";
 let client: any;
 export default function Tbd() {
   const {
     setTbaBalance,
     tbaBalance,
     htmlForFrame,
-    setHtmlForFrame,
     publicClient,
-    setSelectedNft,
-    selectedNft,
     setPublicClient,
     walletClient,
     tokenBoundClient,
@@ -53,28 +38,6 @@ export default function Tbd() {
     typeof window !== "undefined" ? window.ethereum : null;
 
   const initMenu: Nft[] = [];
-  //   {
-  //     address: "0xfd8D7f61C16C65025b8308d97151eaa904eBB7E1",
-  //     nftId: "0",
-  //     chainId: "97",
-  //     title: "title 1",
-  //     description: "description 1",
-  //   },
-  //   {
-  //     address: "0xF4F3A96C24117582316197C4bf0af6c7a2A9571D",
-  //     nftId: "0",
-  //     chainId: "97",
-  //     title: "title 2",
-  //     description: "description 2",
-  //   },
-  //   {
-  //     address: "0xDDBABEAef71416c4273928Aa88b661DddCce33f5",
-  //     nftId: "2",
-  //     chainId: "97",
-  //     title: "title 3",
-  //     description: "description 3",
-  //   },
-  // ];
 
   if (!client) {
     client = createPublicClient({
@@ -86,9 +49,12 @@ export default function Tbd() {
 
   const [retrievedAccount, setRetrievedAccount] = useState<string>("");
 
-  const [tokenId, setTokenId] = useState("0");
-  const [menu, setMenu] = useState(initMenu);
-  const [tokenContract, setTokenContract] = useState(
+  // eslint-disable-next-line
+  const [tokenId] = useState("0");
+  // eslint-disable-next-line
+  const [menu] = useState(initMenu);
+  // eslint-disable-next-line
+  const [tokenContract] = useState(
     process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`
   );
   const DEFAULT_ACCOUNT: TBAccountParams = {
@@ -121,14 +87,7 @@ export default function Tbd() {
     try {
       if (!publicClient) return;
 
-      // const account = tokenboundClient.getAccount(TBAccount);
-      // const currentOwner = await publicClient.readContract({
-      //   address: process.env.NEXT_PUBLIC_BSC_TESTNET_IMPL as `0x${string}`,
-      //   abi: ACCOUNT_CONTRACT.abi,
-      //   functionName: "owner",
-      //   args: [],
-      // });
-      // console.log("🚀 ~ getAccount ~ currentOwner:", currentOwner)
+
       debugger;
       const account = await publicClient.readContract({
         address: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
@@ -204,7 +163,7 @@ export default function Tbd() {
       const balanceTba = await getFullBalance(
         account as string,
         walletClient.chain.blockExplorers.etherscan.url,
-        walletClient.chain.rpcUrls.default.http[0]
+        //walletClient.chain.rpcUrls.default.http[0]
       ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010')
       //'https://etherscan.io/nft-transfers?a=0x9bf81cc31d0f1fa7ade83058509a4db154a182a2')
       //   //'https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707#nfttransfers') //account  as `0x${string}`)
@@ -223,11 +182,7 @@ export default function Tbd() {
         "🚀 ~ getAccount ~ getBalance:",
         await provider.provider?.getBalance(account as `0x${string}`)
       );
-      // console.log(
 
-      //   "tokenboundClient.publicClient.chain()",
-      //   tokenboundClient.publicClient.chain
-      // );
       const isDeployed = await tokenBoundClient.checkAccountDeployment({
         accountAddress: account as `0x${string}`,
       });
@@ -249,6 +204,27 @@ export default function Tbd() {
     setError({ isError: false, reason: "" });
   };
 
+  const checkBalance = useCallback(async () => {
+    if (retrievedAccount as `0x${string}`) {
+      debugger;
+      const balance = await tokenBoundClient.getNFT({
+        accountAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`,
+      });
+      console.log("🚀 ~ checkBalance ~ balance:", balance);
+      const isDeployed = await tokenBoundClient.checkAccountDeployment({
+        accountAddress: retrievedAccount as `0x${string}`,
+
+      });
+      alert(
+        `new account: ${retrievedAccount}"🚀 ~ createAccount ~ isDeployed:", ${isDeployed}`
+      );
+
+      setBalanceNft(balance);
+      if (tbaBalance.erc721s?.length > 0) {
+        console.log("🚀 ~ checkBalance ~ tbaBalance:", tbaBalance);
+      }
+    }
+  }, [retrievedAccount, tokenBoundClient, tbaBalance]);
   const createAccount = useCallback(async () => {
     if (!tokenBoundClient || !address) return;
     debugger;
@@ -262,30 +238,9 @@ export default function Tbd() {
     });
     console.log(`new account: ${createdAccount}`);
     checkBalance();
-  }, [tokenBoundClient, TBAccount]);
+  }, [tokenBoundClient, TBAccount, address, checkBalance]);
 
-  const checkBalance = useCallback(async () => {
-    if (retrievedAccount as `0x${string}`) {
-      debugger;
-      const balance = await tokenBoundClient.getNFT({
-        accountAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`,
-      });
-      console.log("🚀 ~ checkBalance ~ balance:", balance);
-      const isDeployed = await tokenBoundClient.checkAccountDeployment({
-        accountAddress: retrievedAccount as `0x${string}`,
-        // process.env
-        //   .NEXT_PUBLIC_TOKEN_BOUND_ACCOUNT as `0x${string}`,
-      });
-      alert(
-        `new account: ${retrievedAccount}"🚀 ~ createAccount ~ isDeployed:", ${isDeployed}`
-      );
 
-      setBalanceNft(balance);
-      if (tbaBalance.erc721s?.length > 0) {
-        console.log("🚀 ~ checkBalance ~ tbaBalance:", tbaBalance);
-      }
-    }
-  }, [retrievedAccount, tokenBoundClient]);
   useEffect(() => {
     if (tbaBalance.erc721s?.length > 0) {
       tbaBalance.erc721s.map((erc721) => {
@@ -307,121 +262,121 @@ export default function Tbd() {
       };
       menu.push(menuItem);
     }
-  }, [tbaBalance]);
+  }, [tbaBalance, menu]);
   return (
-    <div className=" bg-gradient-to-b from-[#76004f] to-[#4b4fa6]">
-      {menu.length > 0 && <DropdownMenu menuItems={menu} />}
+    <div className="min-h-screen bg-gradient-to-b from-[#76004f] to-[#4b4fa6]">
+      <div className="container mx-auto p-4">
+        {menu.length > 0 && <DropdownMenu menuItems={menu} />}
 
-      <main className=" min-h-screen flex-col items-center justify-center ">
-        {htmlForFrame === "" && isConnected && (<div className="container flex flex-col px-4 py-16 ">
+        <main className=" flex-col items-center justify-center ">
+          {htmlForFrame === "" && isConnected && (<div className="container flex flex-col px-4 py-16 ">
 
-          <div className="grid grid-cols-1 gap-8 text-white ">
-            <div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  getAccount();
-                }}
-                className="grid grid-cols-1 gap-4 md:grid-cols-2"
-              >
-                <label htmlFor="nftContract">NFT Contract</label>
-                <input
-                  type="text"
-                  className="h-fit rounded-lg bg-slate-300 p-2 text-black"
-                  id="nftContract"
-                  onChange={(event) =>
-                    setTBAccount({
-                      ...TBAccount,
-                      tokenContract: event.target
-                        .value as TBAccountParams["tokenContract"],
-                    })
-                  }
-                  value={TBAccount.tokenContract}
-                />
-
-                <label htmlFor="nftTokenId">Token ID</label>
-                <input
-                  type="text"
-                  className="h-fit rounded-lg bg-slate-300 p-2 text-black"
-                  id="nftTokenId"
-                  onChange={(event) =>
-                    setTBAccount({
-                      ...TBAccount,
-                      tokenId: event.target.value,
-                    })
-                  }
-                  value={TBAccount.tokenId}
-                />
-                <button
-                  type="submit"
-                  className="col-span-2 h-fit self-end rounded-lg bg-slate-100 p-2 text-black"
+            <div className="grid grid-cols-1 gap-8 text-white ">
+              <div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    getAccount();
+                  }}
+                  className="grid grid-cols-1 gap-4 md:grid-cols-2"
                 >
-                  Check
-                </button>
-              </form>
+                  <label htmlFor="nftContract">NFT Contract</label>
+                  <input
+                    type="text"
+                    className="h-fit rounded-lg bg-slate-300 p-2 text-black"
+                    id="nftContract"
+                    onChange={(event) =>
+                      setTBAccount({
+                        ...TBAccount,
+                        tokenContract: event.target
+                          .value as TBAccountParams["tokenContract"],
+                      })
+                    }
+                    value={TBAccount.tokenContract}
+                  />
 
-              <div className="grid grid-cols-1 gap-4 font-mono text-white">
-                <pre className="w-full overflow-x-auto">
-                  {JSON.stringify(
-                    { ...TBAccount, retrievedAccount, error },
-                    null,
-                    2
+                  <label htmlFor="nftTokenId">Token ID</label>
+                  <input
+                    type="text"
+                    className="h-fit rounded-lg bg-slate-300 p-2 text-black"
+                    id="nftTokenId"
+                    onChange={(event) =>
+                      setTBAccount({
+                        ...TBAccount,
+                        tokenId: event.target.value,
+                      })
+                    }
+                    value={TBAccount.tokenId}
+                  />
+                  <button
+                    type="submit"
+                    className="col-span-2 h-fit self-end rounded-lg bg-slate-100 p-2 text-black"
+                  >
+                    Check
+                  </button>
+                </form>
+
+                <div className="grid grid-cols-1 gap-4 font-mono text-white">
+                  <pre className="w-full overflow-x-auto">
+                    {JSON.stringify(
+                      { ...TBAccount, retrievedAccount, error },
+                      null,
+                      2
+                    )}
+                  </pre>
+                  <div> Balance TBA</div>
+                  <pre>{JSON.stringify(tbaBalance)}</pre>
+                  {tbaBalance.erc721s?.length > 0 && (
+                    <div>
+                      <div>ERC20 Balance</div>
+                      <pre>{JSON.stringify(tbaBalance.erc20s)}</pre>
+                      <div>NFTs Balance</div>
+                      <pre>{JSON.stringify(tbaBalance.erc721s)}</pre>
+                      <div>Coin Balance</div>
+                      <pre>{JSON.stringify(tbaBalance.ethBalance)}</pre>
+                    </div>
                   )}
-                </pre>
-                <div> Balance TBA</div>
-                <pre>{JSON.stringify(tbaBalance)}</pre>
-                {tbaBalance.erc721s?.length > 0 && (
-                  <div>
-                    <div>ERC20 Balance</div>
-                    <pre>{JSON.stringify(tbaBalance.erc20s)}</pre>
-                    <div>NFTs Balance</div>
-                    <pre>{JSON.stringify(tbaBalance.erc721s)}</pre>
-                    <div>Coin Balance</div>
-                    <pre>{JSON.stringify(tbaBalance.ethBalance)}</pre>
-                  </div>
-                )}
-                <pre className="w-full overflow-x-auto">
-                  {JSON.stringify(balanceNft)}
-                </pre>
-                <button
-                  type="button"
-                  className="rounded-lg bg-slate-100 p-2 text-black"
-                  onClick={resetAccount}
-                >
-                  Reset
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-slate-100 p-2 text-black"
-                  onClick={() => createAccount()}
-                >
-                  createAccount
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-slate-100 p-2 text-black"
-                  onClick={() => checkBalance()}
-                >
-                  Check balance
-                </button>
+                  <pre className="w-full overflow-x-auto">
+                    {JSON.stringify(balanceNft)}
+                  </pre>
+                  <button
+                    type="button"
+                    className="rounded-lg bg-slate-100 p-2 text-black"
+                    onClick={resetAccount}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg bg-slate-100 p-2 text-black"
+                    onClick={() => createAccount()}
+                  >
+                    createAccount
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg bg-slate-100 p-2 text-black"
+                    onClick={() => checkBalance()}
+                  >
+                    Check balance
+                  </button>
+                </div>
               </div>
+
             </div>
 
+          </div>)}
+          <div className=" container  ">
+            {htmlForFrame !== "" && (
+              <iframe
+                srcDoc={htmlForFrame}
+                title="Remote Content"
+                className="iframe-content"
+              />
+            )}
           </div>
-
-        </div>)}
-        <div className=" container  ">
-          {htmlForFrame !== "" && (
-            <iframe
-              srcDoc={htmlForFrame}
-              title="Remote Content"
-              className="iframe-content"
-            />
-          )}
-        </div>
-      </main>
-
-
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-const webpack = require('webpack');
+const webpack = require("webpack");
 
 module.exports = {
   reactStrictMode: true,
@@ -8,25 +8,19 @@ module.exports = {
       test: /\.js$/,
       include: /browserslist|keyv/,
       use: {
-        loader: 'babel-loader',
+        loader: "babel-loader",
         options: {
-          presets: [
-            ['@babel/preset-env', { targets: 'defaults' }]
-          ]
-        }
-      }
+          presets: [["@babel/preset-env", { targets: "defaults" }]],
+        },
+      },
     });
 
     // Add Puppeteer to externals
     if (isServer) {
-      config.externals.push('puppeteer');
-      config.externals.push('crawlee');
-      config.externals.push('browserslist')
     }
 
     // Add fallbacks for Puppeteer dependencies
     config.resolve.fallback = {
-      fs: false,
       net: false,
       tls: false,
       child_process: false,
@@ -36,8 +30,19 @@ module.exports = {
       path: false,
       http: false,
       https: false,
+      fs: false,
     };
 
     return config;
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "random.imagecdn.app",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
 };

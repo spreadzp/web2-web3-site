@@ -4,16 +4,12 @@ import type { Nft } from "../interfaces/components.itypes";
 import { proxyUrl } from "../hooks/proxyUrl";
 import { useTbaSiteStore } from "../hooks/store";
 import * as NFT_CONTRACT from "../app/ABIs/nft.sol.json";
-import { BnbIcon, BscIcon, EthIcon, HomeIcon, Item1Icon, getIconByName } from "./Icons";
+import { getIconByName } from "./Icons";
 
 export const DropdownMenu = ({ menuItems }: { menuItems: Nft[] }) => {
   const {
-    setTbaBalance,
-    tbaBalance,
-    htmlForFrame,
     setHtmlForFrame,
     publicClient,
-    selectedNft,
   } = useTbaSiteStore();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -40,7 +36,7 @@ export const DropdownMenu = ({ menuItems }: { menuItems: Nft[] }) => {
         setHtmlForFrame(``);
       }
     },
-    [NFT_CONTRACT.abi, publicClient, selectedNft]
+    [publicClient, setHtmlForFrame]
   );
   const toggleMenu = () => {
     setIsOpen(!isOpen);

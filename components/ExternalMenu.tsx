@@ -1,4 +1,4 @@
-import { HomeIcon, getIconByName } from "./Icons";
+import { getIconByName } from "./Icons";
 import MenuItem from "./MenuItem";
 
 

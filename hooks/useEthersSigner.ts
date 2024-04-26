@@ -1,4 +1,4 @@
-import { type WalletClient, useWalletClient } from "wagmi";
+// import { type WalletClient, useWalletClient } from "wagmi";
 import { ethers } from "ethers";
 
 // Ethers.js Adapters for Wagmi Wallet Client
@@ -26,10 +26,6 @@ import { ethers } from "ethers";
 // }
 
 export const getProvider = async () => {
-  // ethers.getDefaultProvider("matic", {
-  //   etherscan: "MY_API_KEY",
-  //   exclusive: ["etherscan", "infura"],
-  // });
   return ethers.getDefaultProvider(
     "https://data-seed-prebsc-1-s1.binance.org:8545"
   );

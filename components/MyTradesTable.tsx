@@ -10,7 +10,6 @@ export const MyTradesTable: React.FC = () => {
             price: 175,
             buyer: 'Buyer 1',
             nftMetadata: 'Metadata for Item 1',
-            date: '2022-01-03',
         },
         {
             id: 2,
@@ -19,7 +18,6 @@ export const MyTradesTable: React.FC = () => {
             price: 275,
             buyer: 'Buyer 2',
             nftMetadata: 'Metadata for Item 2',
-            date: '2022-01-04',
         },
         // ... add more items as needed
     ];
