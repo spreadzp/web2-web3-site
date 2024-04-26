@@ -1,9 +1,0 @@
-{
-	"id": "XwPnJi7xUAiXEen",
-	"json": "{\"id\":\"XwPnJi7xUAiXEen\",\"url\":\"https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707\",\"loadedUrl\":\"https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707\",\"uniqueKey\":\"https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2024-04-26T13:45:19.418Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707",
-	"url": "https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707"
-}
