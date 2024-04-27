@@ -15,8 +15,10 @@ import { ethers } from "ethers";
 import { getProvider } from '../hooks/useEthersSigner';
 
 
-// eslint-disable-next-line
+
 async function getBalance(contractAddress: string, nftId: string) {
+    console.log("🚀 ~ getBalance ~ nftId:", nftId)
+    console.log("🚀 ~ getBalance ~ contractAddress:", contractAddress)
     return {
         erc20s: [
             {
