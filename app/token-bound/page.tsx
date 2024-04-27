@@ -1,4 +1,5 @@
 "use client";
+import TBA from "../../components/tba";
 import Tbd from "../../components/tbd";
 import { useTbaSiteStore } from "../../hooks/store";
 import { WalletInstallation } from "../../hooks/walletInstallation";
@@ -10,7 +11,8 @@ function Page() {
     return (
         <>
             {!walletClient.chain && <WalletInstallation />}
-            <Tbd />
+            {/* <Tbd /> */}
+            <TBA />
 
         </>
     );

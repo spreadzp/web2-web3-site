@@ -2,7 +2,7 @@ export type Nft = {
   address?: string;
   nftId?: string;
   chainId?: string;
-  link?: string;
+  link?: string | React.JSX.Element;
   title?: string;
   description?: string;
 };
@@ -23,8 +23,8 @@ export type TokenData = {
 export type NFTData = {
   id: number;
   name: string;
-  uri: string;
-  price: number;
+  uri: string | React.JSX.Element;
+  price?: number;
   seller?: string;
   buyer?: string;
   nftMetadata: string;

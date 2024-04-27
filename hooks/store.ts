@@ -47,29 +47,6 @@ type Nft = {
   description?: string;
 };
 
-// const initMenu: Nft[] = [
-//   {
-//     address: "0xfd8D7f61C16C65025b8308d97151eaa904eBB7E1",
-//     nftId: "0",
-//     chainId: "97",
-//     title: "title 1",
-//     description: "description 1",
-//   },
-//   {
-//     address: "0xF4F3A96C24117582316197C4bf0af6c7a2A9571D",
-//     nftId: "0",
-//     chainId: "97",
-//     title: "title 2",
-//     description: "description 2",
-//   },
-//   {
-//     address: "0xDDBABEAef71416c4273928Aa88b661DddCce33f5",
-//     nftId: "2",
-//     chainId: "97",
-//     title: "title 3",
-//     description: "description 3",
-//   },
-// ];
 
 export const useTbaSiteStore = create<ITbaSite>((set) => ({
   menu: {} as Menu,
