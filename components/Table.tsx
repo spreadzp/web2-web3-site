@@ -25,7 +25,7 @@ const Table: React.FC<TableProps> = ({ data, onBuyClick }) => {
                 </thead>
                 <tbody>
                     {data.map((item, index) => (
-                        <tr key={item.id || index}>
+                        <tr key={index}>
                             {Object.values(item).map((value, valueIndex) => (
                                 <td key={valueIndex} className="border px-4 py-2">
                                     {value}

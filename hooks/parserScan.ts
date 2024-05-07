@@ -184,33 +184,31 @@ async function getTokensInfo(
 
 
 
-export const fetchTokensContent = async (url: string): Promise<number[]> => {
-    try {
-        const html = await proxyUrl(url);
-        debugger
-        const $ = cheerio.load(html);
-        console.log("🚀 ~ fetchTokensContent ~ $:", $)
+// export const fetchTokensContent = async (url: string): Promise<number[]> => {
+//     try {
+//         const html = await proxyUrl(url);
+//         debugger
+//         const $ = cheerio.load(html);
+//         console.log("🚀 ~ fetchTokensContent ~ $:", $)
 
-        // Find all the <td> elements that contain the token ID information
-        const tokenIdTds = $('td').filter((index, element) => {
-            console.log("🚀 ~ tokenIdTds ~ element:", element)
-            debugger
-            const href = $(element).find('a').attr('href');
-            return href && href.startsWith('/nft/');
-        });
-        debugger
-        // Extract the token IDs from the href attribute of the <a> tags
-        const tokenIds = tokenIdTds.map((index, element) => {
-            const href = $(element).find('a').attr('href') || '';
-            const tokenId = href.split('/').pop() || ''; // Get the last part after the last '/'
-            return parseInt(tokenId, 10); // Convert the token ID to a number
-        }).get(); // Convert the Cheerio object to a plain array
 
-        console.log(tokenIds); // 
+//         const tokenIdTds = $('td').filter((index, element) => {
+//             console.log("🚀 ~ tokenIdTds ~ element:", element)
+//             const href = $(element).find('a').attr('href');
+//             return href && href.startsWith('/nft/');
+//         });
+//         // Extract the token IDs from the href attribute of the <a> tags
+//         const tokenIds = tokenIdTds.map((index, element) => {
+//             const href = $(element).find('a').attr('href') || '';
+//             const tokenId = href.split('/').pop() || ''; // Get the last part after the last '/'
+//             return parseInt(tokenId, 10); // Convert the token ID to a number
+//         }).get(); // Convert the Cheerio object to a plain array
 
-        return tokenIds;
-    } catch (err) {
-        console.error("Error fetching tokens content:", err);
-        return [];
-    }
-};
+//         console.log(tokenIds); // 
+
+//         return tokenIds;
+//     } catch (err) {
+//         console.error("Error fetching tokens content:", err);
+//         return [];
+//     }
+// };

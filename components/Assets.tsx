@@ -19,20 +19,16 @@ export const Assets = () => {
         // Handle the form submission here
     };
 
-    // Example data for the tables
     const coinsData = [
-        { id: 1, address: 'Address 1', amount: 100 },
-        // ... more coins data
+        { '#': 1, address: 'Address 1', amount: 100, symbol: 'BNB', name: 'BNB' },
     ];
 
     const tokensData = [
-        { id: 1, address: 'Address 1', name: 'Token 1', amount: 50 },
-        // ... more tokens data
+        { '#': 1, address: 'Address 1', name: 'Token 1', amount: 50 },
     ];
 
     const nftsData = [
-        { id: 1, name: 'NFT 1', uri: 'http://example.com/nft1', price: 1000, seller: 'Seller 1', nftMetadata: 'Metadata for NFT 1' },
-        // ... more NFTs data
+        { '#': 1, name: 'NFT 1', uri: 'http://example.com/nft1', price: 1000, seller: 'Seller 1', nftMetadata: 'Metadata for NFT 1' },
     ];
 
     return (

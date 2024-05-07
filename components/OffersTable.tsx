@@ -7,7 +7,7 @@ export const OffersTable: React.FC = () => {
     ];
     for (let i = 3; i <= 15; i++) {
         offersData.push({
-            id: i,
+            '#': i,
             name: `Item ${i}`,
             uri: `http://example.com/item${i}`,
             price: i * 100,

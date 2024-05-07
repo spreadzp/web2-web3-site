@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { TableData } from '../interfaces/components.itypes';
 import Table from './Table';
 import { getIconByName } from './Icons';
@@ -7,50 +7,16 @@ import { Tooltip } from 'react-tooltip';
 import type { TBAccountParams } from '@tokenbound/sdk';
 import { useTbaSiteStore, type Balance } from '../hooks/store';
 import { useAccount } from 'wagmi';
-import { createPublicClient, createWalletClient, custom, formatUnits } from 'viem';
+import { createPublicClient, createWalletClient, custom } from 'viem';
 import { bscTestnet } from 'viem/chains';
 import { getFullBalance } from '../hooks/parserScan';
-import * as ACCOUNT_CONTRACT from "../app/ABIs/artifacts/Account.json";
 import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/artifacts/AccountRegistry.json";
-import { ethers } from "ethers";
-import { getProvider } from '../hooks/useEthersSigner';
-import axios from 'axios';
-import { proxyUrl } from '../hooks/proxyUrl';
-//import axios from 'axios';
-
-function getBalance(contractAddress: string, nftId: string) {
-    console.log("🚀 ~ getBalance ~ nftId:", nftId)
-    console.log("🚀 ~ getBalance ~ contractAddress:", contractAddress)
-    return {
-        erc20s: [
-            {
-                contractAddress: '0x95413c4f761371274bdbe76e5fd6d4ddbb4870f9',
-                balance: '555533.0',
-                name: 'Site Token',
-                symbol: 'STKN',
-            },
-        ],
-        erc721s: [
-            {
-                contractAddress: '0xfd8d7f61c16c65025b8308d97151eaa904ebb7e1',
-                nftId: 1e-18,
-                uri: 'https://sites.gnfd-testnet-sp3.bnbchain.org/tic-tac-toe.html?Authorization=GNFD1-EDDSA%2CSignature%3D079b142d1a55ca38608071d9e456c7a8f998a7c2dd763155eed68c53d7c85f9d02475638513fd3e81e0116cfd19a001081d1e22df4cef9709db9518607863644&X-Gnfd-App-Domain=https%3A%2F%2Ftestnet.dcellar.io&X-Gnfd-Expiry-Timestamp=2024-02-07T06%3A21%3A13.853Z&X-Gnfd-User-Address=0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010&view=1',
-                name: '2-D-games',
-                symbol: 'GAME',
-            },
-        ],
-        ethBalance: '0.001',
-    };
-}
-
 
 
 const TBA: React.FC = () => {
-    const [htmlForFrame, setHtmlForFrame] = useState('');
     //const [url, setUrl] = useState('');
     const {
         setTbaBalance,
-        tbaBalance,
         publicClient,
         setPublicClient,
         walletClient,
@@ -59,7 +25,7 @@ const TBA: React.FC = () => {
         setWalletClient
     } = useTbaSiteStore();
 
-    const { isConnected, address } = useAccount();
+    const { address } = useAccount();
     const browserWeb3Provider =
         typeof window !== "undefined" ? window.ethereum : null;
 
@@ -77,17 +43,10 @@ const TBA: React.FC = () => {
         tokenContract: tokenContract,
         tokenId: tokenId,
     };
-    const [balanceNft, setBalanceNft] = useState(
-        {} as {
-            tokenContract: `0x${string}`;
-            tokenId: string;
-            chainId: number;
-        }
-    );
+
 
     const [isTbaDeployed, setIsTbaDeployed] = useState(false);
     const [isTbaCreate, setIsTbaCreate] = useState(false);
-    // const [TBAccount, setTBAccount] = useState<TBAccountParams>(DEFAULT_ACCOUNT);
     const [error, setError] = useState<{
         isError: boolean;
         reason: string;
@@ -97,10 +56,12 @@ const TBA: React.FC = () => {
     });
 
 
-    const [nftContractAddress, setNftContractAddress] = useState('');
-    const [nftId, setNftId] = useState('');
-    const [balance, setBalance] = useState<Balance | null>(null);
+    useEffect(() => {
+        setTBAccount(DEFAULT_ACCOUNT);
+        // eslint-disable-next-line
+    }, []);
 
+    const [balance, setBalance] = useState<Balance | null>(null);
 
     const initPublicClient = useCallback(() => {
         const client = createPublicClient({
@@ -127,8 +88,6 @@ const TBA: React.FC = () => {
     if (!walletClient.writeContract) {
         initWalletClient();
     };
-
-
 
     const resetAccount = () => {
 
@@ -180,25 +139,12 @@ const TBA: React.FC = () => {
                     retrievedAccount as string,
                     walletClient?.chain?.blockExplorers?.etherscan.url as string,
 
-                ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010')
-
-                // const balance = await publicClient.getBalance({
-                //     address: retrievedAccount as `0x${string}`,
-                // })
-                // console.log("🚀 ~ handleSubmit ~ balance:", balance)
-                // const balance = await tokenBoundClient.({
-                //     address: retrievedAccount as `0x${string}`,
-                // })
-                //console.log("🚀 ~ handleSubmit ~ balance:", balance)
-
+                ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010') 
 
                 if (balanceTba) {
-                    //balanceTba.ethBalance = `${formatUnits(balance, 18)}`
-                    debugger
                     setTbaBalance(balanceTba);
                     setBalance(balanceTba);
                 }
-                //const balance = await getBalance(nftContractAddress, nftId)
 
             }
 
@@ -206,7 +152,7 @@ const TBA: React.FC = () => {
             setError({ isError: true, reason: JSON.stringify(error) });
             console.log("🚀 ~ getAccount ~ error:", error);
         }
-    }, [retrievedAccount, checkDeployTBAccount, isTbaDeployed, TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, publicClient, initPublicClient, walletClient, initWalletClient, setTbaBalance]);
+    }, [checkDeployTBAccount, isTbaDeployed, retrievedAccount, walletClient?.chain, setTbaBalance, setBalance]);
 
     const createAccount = useCallback(async () => {
         if (!tokenBoundClient || !address) return;
@@ -350,6 +296,4 @@ const TBA: React.FC = () => {
         </div >
     )
 }
-export default TBA;
-
-
+export default TBA; 
