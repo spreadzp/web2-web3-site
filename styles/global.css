@@ -1,6 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+:root {
+  --white: #fff;
+  --primary: #007bff;
+}
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -197,4 +201,26 @@ body {
 
 .collaboration-form button:hover {
   background-color: #0056b3;
+}
+
+.banner {
+  background-color: var(--primary);
+  color: var(--white);
+  padding: 20px;
+  animation: enlarge 1000ms alternate infinite;
+  transform: scale(pow(0.9, var(--scale, 0)));
+}
+@property --scale {
+  syntax: "<number-";
+  inherits: true;
+  initial-value: 1;
+}
+
+@keyframes enlarge {
+  0% {
+    --scale: 0;
+  }
+  100% {
+    --scale: 0.9;
+  }
 }

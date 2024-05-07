@@ -1,15 +1,16 @@
 import type { TokenboundClient } from "@tokenbound/sdk";
-import type { PublicClient } from "viem";
+import type { TBAccountParams } from '@tokenbound/sdk';
+import type { PublicClient, WalletClient } from "viem";
 import { create } from "zustand";
-type ERC721Param = {
+export type ERC721Param = {
   contractAddress: string;
-  nftId: number;
+  nftId?: number;
   uri: string;
   name: string;
   symbol: string;
 };
 
-type ERC20Param = {
+export type ERC20Param = {
   contractAddress: string;
   balance: string;
   name: string;
@@ -34,8 +35,10 @@ interface ITbaSite {
   setSelectedNft: (nft: Nft) => void;
   tokenBoundClient: TokenboundClient;
   setTokenBoundClient: (client: TokenboundClient) => void;
-  walletClient: any;
-  setWalletClient: (client: any) => void;
+  walletClient: WalletClient;
+  setWalletClient: (client: WalletClient) => void;
+  TBAccount: TBAccountParams;
+  setTBAccount: (TBAccount: TBAccountParams) => void;
 }
 
 type Nft = {
@@ -62,6 +65,9 @@ export const useTbaSiteStore = create<ITbaSite>((set) => ({
   tokenBoundClient: {} as TokenboundClient,
   setTokenBoundClient: (client: TokenboundClient) =>
     set({ tokenBoundClient: client }),
-  walletClient: {} as any,
-  setWalletClient: (client: any) => set({ walletClient: client }),
+  walletClient: {} as WalletClient,
+  setWalletClient: (client: WalletClient) => set({ walletClient: client }),
+  TBAccount: {} as TBAccountParams,
+  setTBAccount: (TBAccount: TBAccountParams) => set({ TBAccount: TBAccount }),
+
 }));

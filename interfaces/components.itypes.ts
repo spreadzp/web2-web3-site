@@ -8,20 +8,20 @@ export type Nft = {
 };
 
 export type CoinData = {
-  id: number;
-  address: string;
+  '#': number;
+  symbol: string;
   amount: number;
 };
 
 export type TokenData = {
-  id: number;
+  '#': number;
   address: string;
   name: string;
   amount: number;
 };
 
 export type NFTData = {
-  id: number;
+  '#': number;
   name: string;
   uri: string | React.JSX.Element;
   price?: number;

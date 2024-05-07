@@ -225,6 +225,7 @@ export default function Tbd() {
       }
     }
   }, [retrievedAccount, tokenBoundClient, tbaBalance]);
+
   const createAccount = useCallback(async () => {
     if (!tokenBoundClient || !address) return;
     debugger;

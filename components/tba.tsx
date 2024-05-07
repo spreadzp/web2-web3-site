@@ -1,22 +1,24 @@
-import React, { useCallback, useState } from 'react';
+'use client';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableData } from '../interfaces/components.itypes';
 import Table from './Table';
 import { getIconByName } from './Icons';
 import { Tooltip } from 'react-tooltip';
 import type { TBAccountParams } from '@tokenbound/sdk';
-import { useTbaSiteStore } from '../hooks/store';
+import { useTbaSiteStore, type Balance } from '../hooks/store';
 import { useAccount } from 'wagmi';
-import { createPublicClient, custom } from 'viem';
+import { createPublicClient, createWalletClient, custom, formatUnits } from 'viem';
 import { bscTestnet } from 'viem/chains';
 import { getFullBalance } from '../hooks/parserScan';
-import * as ACCOUNT_CONTRACT from "../app/ABIs/Account.sol/Account.json";
-import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/AccountRegistry.sol/AccountRegistry.json";
+import * as ACCOUNT_CONTRACT from "../app/ABIs/artifacts/Account.json";
+import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/artifacts/AccountRegistry.json";
 import { ethers } from "ethers";
 import { getProvider } from '../hooks/useEthersSigner';
+import axios from 'axios';
+import { proxyUrl } from '../hooks/proxyUrl';
+//import axios from 'axios';
 
-
-
-async function getBalance(contractAddress: string, nftId: string) {
+function getBalance(contractAddress: string, nftId: string) {
     console.log("🚀 ~ getBalance ~ nftId:", nftId)
     console.log("🚀 ~ getBalance ~ contractAddress:", contractAddress)
     return {
@@ -41,42 +43,30 @@ async function getBalance(contractAddress: string, nftId: string) {
     };
 }
 
-interface Balance {
-    erc20s: Array<{ contractAddress: string; balance: string; name: string; symbol: string }>;
-    erc721s: Array<{ contractAddress: string; nftId: number; uri: string; name: string; symbol: string }>;
-    ethBalance: string;
-}
+
 
 const TBA: React.FC = () => {
-
+    const [htmlForFrame, setHtmlForFrame] = useState('');
+    //const [url, setUrl] = useState('');
     const {
         setTbaBalance,
         tbaBalance,
-        htmlForFrame,
         publicClient,
         setPublicClient,
         walletClient,
         tokenBoundClient,
+        TBAccount, setTBAccount,
+        setWalletClient
     } = useTbaSiteStore();
 
     const { isConnected, address } = useAccount();
     const browserWeb3Provider =
         typeof window !== "undefined" ? window.ethereum : null;
 
-
-
-    if (!publicClient) {
-        const client = createPublicClient({
-            chain: bscTestnet,
-            transport: custom(browserWeb3Provider!),
-        });
-        setPublicClient(client);
-    }
-
     const [retrievedAccount, setRetrievedAccount] = useState<string>("");
 
     // eslint-disable-next-line
-    const [tokenId] = useState("0");
+    const [tokenId] = useState("2");
     // eslint-disable-next-line
     //const [menu] = useState(initMenu);
     // eslint-disable-next-line
@@ -94,7 +84,10 @@ const TBA: React.FC = () => {
             chainId: number;
         }
     );
-    const [TBAccount, setTBAccount] = useState<TBAccountParams>(DEFAULT_ACCOUNT);
+
+    const [isTbaDeployed, setIsTbaDeployed] = useState(false);
+    const [isTbaCreate, setIsTbaCreate] = useState(false);
+    // const [TBAccount, setTBAccount] = useState<TBAccountParams>(DEFAULT_ACCOUNT);
     const [error, setError] = useState<{
         isError: boolean;
         reason: string;
@@ -102,248 +95,238 @@ const TBA: React.FC = () => {
         isError: false,
         reason: "",
     });
+
+
     const [nftContractAddress, setNftContractAddress] = useState('');
     const [nftId, setNftId] = useState('');
     const [balance, setBalance] = useState<Balance | null>(null);
 
-    const handleSubmit = async () => {
-        const balanceData = await getBalance(nftContractAddress, nftId);
-        setBalance(balanceData);
+
+    const initPublicClient = useCallback(() => {
+        const client = createPublicClient({
+            chain: bscTestnet,
+            transport: custom(browserWeb3Provider!),
+        });
+        setPublicClient(client);
+
+    }, [browserWeb3Provider, setPublicClient,])
+
+
+    const initWalletClient = useCallback(() => {
+        const client = createWalletClient({
+            chain: bscTestnet,
+            transport: custom(browserWeb3Provider!),
+        });
+        setWalletClient(client);
+
+    }, [browserWeb3Provider, setWalletClient])
+
+    if (!publicClient.readContract) {
+        initPublicClient();
+    };
+    if (!walletClient.writeContract) {
+        initWalletClient();
     };
 
-    const getAccount = async () => {
-        if (!TBAccount.tokenId) {
-            return setError({
-                isError: true,
-                reason: "tokenId undefined",
-            });
-        }
-        try {
-            if (!publicClient) return;
 
-            const account = await publicClient.readContract({
-                address: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
-                abi: ACCOUNT_REGISTRY_CONTRACT.abi,
-                functionName: "account",
-                args: [TBAccount.tokenContract, TBAccount.tokenId],
-            });
-            setRetrievedAccount(account as string);
-
-            const currentOwner = await publicClient.readContract({
-                address: account as `0x${string}`,
-                abi: ACCOUNT_CONTRACT.abi,
-                functionName: "owner",
-                args: [],
-            });
-            console.log("🚀 ~ getAccount ~ currentOwner:", currentOwner);
-            const isAuthorized = await publicClient.readContract({
-                address: account as `0x${string}`,
-                abi: ACCOUNT_CONTRACT.abi,
-                functionName: "isAuthorized",
-                args: [currentOwner],
-            });
-            const currentProvider = await getProvider();
-
-            const balance = await currentProvider.getBalance(
-                account as `0x${string}`
-            );
-            const transactionCount = await currentProvider.getTransactionCount(
-                account as `0x${string}`
-            );
-            console.log("🚀 ~ getAccount ~ balance:", balance);
-            console.log("🚀 ~ getAccount ~ transactionCount:", transactionCount);
-            const startBlock = 37854102; // Get latest 1000 transactions
-            const endBlock = startBlock + 1;
-
-            const txHashes = [];
-            for (
-                let blockNumber = startBlock;
-                blockNumber <= endBlock;
-                blockNumber++
-            ) {
-                const block = await currentProvider.getBlock(blockNumber);
-                console.log("🚀 ~ getAccount ~ block:", block);
-
-                // Filter block's transactions for the target account
-                const blockTxs = block?.transactions.filter(async (tx: any) => {
-                    const recept = await currentProvider.getTransactionReceipt(tx);
-                    //console.log("🚀 ~ getAccount ~ recept:", recept)
-                    if (recept?.from === account || recept?.to === account) {
-                        console.log("@@@@@@recept", recept?.logs);
-
-                        console.log("recept?.contractAddress", recept?.contractAddress);
-                        console.log("first", recept?.hash);
-                        console.log("getTransaction", await recept?.getTransaction());
-                    }
-                });
-
-                // Extract and add transaction hashes
-                if (blockTxs && blockTxs?.length > 0) {
-                    txHashes.push(...blockTxs?.map((tx) => tx));
-                }
-            }
-
-            console.log("🚀 ~ getAccount ~ isAuthorized:", isAuthorized);
-            const token = await publicClient.readContract({
-                address: account as `0x${string}`,
-                abi: ACCOUNT_CONTRACT.abi,
-                functionName: "token",
-                args: [],
-            });
-
-            const balanceTba = await getFullBalance(
-                account as string,
-                walletClient.chain.blockExplorers.etherscan.url,
-                //walletClient.chain.rpcUrls.default.http[0]
-            ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010')
-            //'https://etherscan.io/nft-transfers?a=0x9bf81cc31d0f1fa7ade83058509a4db154a182a2')
-            //   //'https://testnet.bscscan.com/address/0x4c50D7966F9d7f9a5ca332c9524F3710CB516707#nfttransfers') //account  as `0x${string}`)
-            if (balanceTba) {
-                setTbaBalance(balanceTba);
-            }
-            const bal = await publicClient.getBalance({
-                address: account as `0x${string}`,
-            });
-
-            console.log("🚀 ~ getAccount ~ token:", token);
-            console.log("🚀 ~ getAccount ~ bal:", Number(bal));
-            const provider = new ethers.VoidSigner(currentOwner as `0x${string}`);
-
-            console.log(
-                "🚀 ~ getAccount ~ getBalance:",
-                await provider.provider?.getBalance(account as `0x${string}`)
-            );
-
-            const isDeployed = await tokenBoundClient.checkAccountDeployment({
-                accountAddress: account as `0x${string}`,
-            });
-            console.log("🚀 ~ getAccount ~ isDeployed:", isDeployed);
-            setError({ isError: false, reason: "" });
-        } catch (err) {
-            console.error(err);
-            //setRetrievedAccount("");
-            setError({
-                isError: true,
-                reason: JSON.stringify(err),
-            });
-        }
-    };
 
     const resetAccount = () => {
 
-        // setRetrievedAccount("");
-        // setTBAccount(DEFAULT_ACCOUNT);
+        setRetrievedAccount("");
+        setTBAccount({ tokenContract: "0x0", tokenId: "" });
         setError({ isError: false, reason: "" });
-        setNftContractAddress('');
-        setNftId('');
+        setIsTbaDeployed(false);
+        setIsTbaCreate(false);
     };
 
-    const checkBalance = useCallback(async () => {
-        if (retrievedAccount as `0x${string}`) {
-            const balance = await tokenBoundClient.getNFT({
-                accountAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`,
-            });
-            console.log("🚀 ~ checkBalance ~ balance:", balance);
-            const isDeployed = await tokenBoundClient.checkAccountDeployment({
-                accountAddress: retrievedAccount as `0x${string}`,
+    const checkDeployTBAccount = useCallback(async () => {
+        if (TBAccount.tokenContract as `0x${string}`) {
+            if (!publicClient.readContract) {
+                initPublicClient();
+            };
+            if (publicClient.readContract) {
+                const account = await publicClient.readContract({
+                    address: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
+                    abi: ACCOUNT_REGISTRY_CONTRACT.abi,
+                    functionName: "account",
+                    args: [TBAccount.tokenContract, TBAccount.tokenId],
+                });
 
-            });
-            alert(
-                `new account: ${retrievedAccount}"🚀 ~ createAccount ~ isDeployed:", ${isDeployed}`
-            );
+                setRetrievedAccount(account as string);
+                const isDeployed = await tokenBoundClient.checkAccountDeployment({
+                    accountAddress: account as `0x${string}`,
 
-            setBalanceNft(balance);
-            if (tbaBalance.erc721s?.length > 0) {
-                console.log("🚀 ~ checkBalance ~ tbaBalance:", tbaBalance);
+                });
+
+                setIsTbaDeployed(isDeployed);
+                setIsTbaCreate(!isDeployed);
+                if (isDeployed) {
+                    setError({ isError: false, reason: "" });
+                }
             }
+
+        } else {
+            alert(`'Wrong address format!'${TBAccount.tokenContract}`);
         }
-    }, [retrievedAccount, tokenBoundClient, tbaBalance]);
+    }, [TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, publicClient, initPublicClient]);
+
+
+    const handleSubmit = useCallback(async () => {
+        try {
+            await checkDeployTBAccount()
+            if (isTbaDeployed) {
+                console.log('walletClient?.chain', walletClient?.chain)
+                const balanceTba = await getFullBalance(
+                    retrievedAccount as string,
+                    walletClient?.chain?.blockExplorers?.etherscan.url as string,
+
+                ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010')
+
+                // const balance = await publicClient.getBalance({
+                //     address: retrievedAccount as `0x${string}`,
+                // })
+                // console.log("🚀 ~ handleSubmit ~ balance:", balance)
+                // const balance = await tokenBoundClient.({
+                //     address: retrievedAccount as `0x${string}`,
+                // })
+                //console.log("🚀 ~ handleSubmit ~ balance:", balance)
+
+
+                if (balanceTba) {
+                    //balanceTba.ethBalance = `${formatUnits(balance, 18)}`
+                    debugger
+                    setTbaBalance(balanceTba);
+                    setBalance(balanceTba);
+                }
+                //const balance = await getBalance(nftContractAddress, nftId)
+
+            }
+
+        } catch (error) {
+            setError({ isError: true, reason: JSON.stringify(error) });
+            console.log("🚀 ~ getAccount ~ error:", error);
+        }
+    }, [retrievedAccount, checkDeployTBAccount, isTbaDeployed, TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, publicClient, initPublicClient, walletClient, initWalletClient, setTbaBalance]);
+
     const createAccount = useCallback(async () => {
         if (!tokenBoundClient || !address) return;
-        debugger;
-        const createdAccount = await tokenBoundClient.createAccount({
-            tokenContract: TBAccount.tokenContract,
-            tokenId: TBAccount.tokenId,
-            implementationAddress: process.env
-                .NEXT_PUBLIC_BSC_TESTNET_IMPL as `0x${string}`,
-            registryAddress: process.env
-                .NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
+        const { request } = await publicClient.simulateContract({
+            address: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS as `0x${string}`,
+            abi: ACCOUNT_REGISTRY_CONTRACT.abi,
+            functionName: "createAccount",
+            args: [TBAccount.tokenContract, TBAccount.tokenId],
         });
-        console.log(`new account: ${createdAccount}`);
-        checkBalance();
-    }, [tokenBoundClient, TBAccount, address, checkBalance]);
+        const hash = await walletClient.writeContract(request);
 
+        if (hash) {
+            setIsTbaCreate(false);
+        }
+    }, [publicClient, walletClient, TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, address]);
+
+    const handleInput = (event: any, inputName: string) => {
+        setTBAccount({ ...TBAccount, [inputName]: event.target.value });
+    }
     const renderLinkUri = (uri: string) => {
         return (<a href={uri} target="_blank" rel="noopener noreferrer" className='text-blue-500'>Link</a>);
     }
     const renderBalanceTable = () => {
         if (!balance) return null;
-        const coinData: TableData[] = [{ id: 1, address: 'ETH', amount: parseFloat(balance.ethBalance) }];
+        const coinData: TableData[] = [{ '#': 1, symbol: walletClient?.chain?.nativeCurrency.symbol || "ETH", amount: parseFloat(balance.ethBalance) }];
         const tokenData: TableData[] = balance.erc20s.map((token, index) => ({
-            id: index + 2,
+            '#': index + 2,
             address: token.contractAddress,
             name: token.name,
             amount: parseFloat(token.balance),
         }));
         const nftData: TableData[] = balance.erc721s.map((nft, index) => ({
-            id: index + balance.erc20s.length + 2,
+            '#': index + balance.erc20s.length + 2,
             name: nft.name,
             uri: renderLinkUri(nft.uri),
-            nftId: 0,
+            symbol: nft.symbol,
+            //nftId: nft.nftId,
             nftMetadata: JSON.stringify(nft.symbol),
         }));
 
-
-
         return <div>
+            <div className="w-full text-center text-white font-bold mb-4">Balances for Tba account {retrievedAccount} </div>
+            <div className="w-full text-center text-white font-bold mb-4"> Created from contract {TBAccount.tokenContract} with nftId {TBAccount.tokenId}</div>
+            <div className="w-full text-center text-white font-bold mb-4">Balance in coins</div>
             <Table data={coinData} />
+            <div className="w-full text-center text-white font-bold mb-4">Balance in tokens</div>
             <Table data={tokenData} />
+            <div className="w-full text-center text-white font-bold mb-4">Balance in NFTs</div>
             <Table data={nftData} />
         </div>;
+
     };
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#76004f] to-[#4b4fa6]">
             <div className="container mx-auto p-4">
                 {balance === null && (
-                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4 items-center">
+                    <div className="flex flex-col space-y-4 items-center">
                         <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 w-full md:w-1/2">
                             <label className="flex flex-col text-white w-full">
                                 NFT Contract Address:
                                 <input
                                     type="text"
-                                    value={nftContractAddress}
-                                    onChange={(e) => setNftContractAddress(e.target.value)}
+                                    value={TBAccount.tokenContract}
+                                    onChange={(event) => handleInput(event, "tokenContract")}
                                     className="border border-gray-300 p-2 rounded text-black w-full"
+                                    placeholder='0x0000000000000000000000000000000000000000'
                                 />
                             </label>
                             <label className="flex flex-col text-white w-full">
                                 NFT ID:
                                 <input
                                     type="text"
-                                    value={nftId}
-                                    onChange={(e) => setNftId(e.target.value)}
+                                    onChange={(event) => handleInput(event, "tokenId")}
+
+                                    value={TBAccount.tokenId}
                                     className="border border-gray-300 p-2 rounded text-black w-full"
+                                    placeholder='1'
                                 />
                             </label>
                         </div>
                         <div className="flex flex-col md:flex-row md:space-x-4 w-full md:w-1/2">
-                            <button
+                            {(TBAccount.tokenContract || TBAccount.tokenId) && <button
                                 type="button"
                                 className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                                 onClick={() => resetAccount()}
                             >
-                                Reset
-                            </button>
-                            <button
-                                type="submit"
+                                {(TBAccount.tokenContract && TBAccount.tokenId) ? "Reset" : "Fill all inputs or reset"}
+
+                            </button>}
+                            {TBAccount.tokenContract && TBAccount.tokenId && < button
+                                onClick={() => handleSubmit()}
                                 className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                             >
-                                Check TBA
-                            </button>
-                        </div>
+                                {!isTbaCreate && retrievedAccount ? "Check balance TBA" : "Check deployed TBA"}
+                            </button>}
+                            {isTbaCreate && (
+                                <>
+                                    <button className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded banner" onClick={() => createAccount()}>
+                                        Create TBA
+                                    </button>
+                                </>
+                            )}
 
-                    </form>
-                )}
+                        </div>
+                        {isTbaCreate && (
+                            <div className="text-orange-300">
+                                <div  >Tba account {retrievedAccount} is not deployed yet </div>
+                                <div> for token {TBAccount.tokenContract} with tokenId {TBAccount.tokenId}</div>
+
+                            </div>
+                        )}
+                        {!isTbaCreate && retrievedAccount && (
+                            <div className="text-orange-300">
+                                <div>Tba account {retrievedAccount} is  deployed   </div>
+                                <div> for contract {TBAccount.tokenContract} with tokenId {TBAccount.tokenId}</div>
+                            </div>
+                        )}
+                    </div>
+                )
+                }
                 {balance && (
                     <>
                         <button
@@ -356,19 +339,17 @@ const TBA: React.FC = () => {
                         </button>
                         {renderBalanceTable()}
                     </>
-                )}{!balance && nftContractAddress && nftId && (
-                    <>
-
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full md:w-auto">
-                            Create TBA
-                        </button>
-                    </>
                 )}
 
                 <Tooltip id="back-tooltip" />
-            </div>
-        </div>
-    );
-};
+                {error.isError && <div data-tooltip-id='error-tooltip' data-tooltip-content={error.reason} className="text-white">{error.reason}</div>}
+                <Tooltip id="error-tooltip" />
+            </div >
 
+
+        </div >
+    )
+}
 export default TBA;
+
+
