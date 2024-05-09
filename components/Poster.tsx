@@ -3,7 +3,7 @@ import Image from "next/image";
 interface PosterProps {
     title: string;
     description: string;
-    imageUrl: string;
+    imageUrl: any;
 }
 
 const Poster: React.FC<PosterProps> = ({ title, description, imageUrl }) => {

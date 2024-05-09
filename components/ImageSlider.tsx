@@ -19,19 +19,19 @@ const ImageSlider: React.FC = () => {
         <div className="image-slider">
             <Slider {...settings}>
                 <div>
-                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 1" width={1500} height={350} />
+                    <Image src="https://random.imagecdn.app/500/300" alt="Image 1" width={1500} height={300} />
                 </div>
                 <div>
-                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 2" width={1500} height={350} />
+                    <Image src="https://random.imagecdn.app/500/300" alt="Image 1" width={1500} height={300} />
                 </div>
                 <div>
-                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 3" width={1500} height={350} />
+                    <Image src="https://random.imagecdn.app/500/300" alt="Image 1" width={1500} height={300} />
                 </div>
                 <div>
-                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 4" width={1500} height={350} />
+                    <Image src="https://random.imagecdn.app/500/300" alt="Image 1" width={1500} height={300} />
                 </div>
                 <div>
-                    <Image src="https://random.imagecdn.app/1500/150" alt="Image 5" width={1500} height={350} />
+                    <Image src="https://random.imagecdn.app/500/300" alt="Image 1" width={1500} height={300} />
                 </div>
 
             </Slider>

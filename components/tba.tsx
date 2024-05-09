@@ -74,15 +74,20 @@ const TBA: React.FC = () => {
 
     }, [browserWeb3Provider, setWalletClient])
 
-    if (!publicClient.readContract) {
-        initPublicClient();
-    };
-    if (!walletClient.writeContract) {
-        initWalletClient();
-    };
+    useEffect(() => {
+        if (!publicClient.readContract) {
+            initPublicClient();
+        };
+    }, [publicClient, initPublicClient])
+
+    useEffect(() => {
+        if (!walletClient.writeContract) {
+            initWalletClient();
+        };
+    }, [walletClient, initWalletClient]);
+
 
     const resetAccount = () => {
-
         setRetrievedAccount("");
         setTBAccount({ tokenContract: "0x0", tokenId: "" });
         setError({ isError: false, reason: "" });
@@ -138,7 +143,7 @@ const TBA: React.FC = () => {
                     if (balanceTba) {
                         setTbaBalance(balanceTba);
                     }
-                }, 1000)
+                }, 500)
 
             }
         } catch (error) {
