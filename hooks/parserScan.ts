@@ -1,8 +1,9 @@
+
 "use server";
 
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
+import cheerio from "cheerio";
 import { getProvider } from "./useEthersSigner";
-import * as cheerio from "cheerio";
 import type { Balance, ERC20Param, ERC721Param } from "./store";
 import { proxyUrl } from "./proxyUrl";
 
@@ -98,6 +99,7 @@ async function getTokensInfo(
                 contractInstance.name(),
                 contractInstance.symbol()
             ]);
+
             const numberTokensOrNftId = ethers.formatUnits(balanceResult, 18);
             const numberedToken = Number(numberTokensOrNftId);
 
@@ -157,10 +159,9 @@ async function getTokensInfo(
         }
     });
 
-    // Wait for all promises to resolve and update the balance object
+
     try {
         const results = await Promise.all(balancePromises);
-        // Flatten the results and separate ERC20s and ERC721s
         const erc20s: ERC20Param[] = [];
         const erc721s: ERC721Param[] = [];
 
@@ -172,7 +173,6 @@ async function getTokensInfo(
             }
         });
 
-        // Update the balance object with the results
         balance.erc20s = erc20s;
         balance.erc721s = erc721s;
     } catch (err) {
@@ -181,34 +181,3 @@ async function getTokensInfo(
 
     return balance;
 }
-
-
-
-// export const fetchTokensContent = async (url: string): Promise<number[]> => {
-//     try {
-//         const html = await proxyUrl(url);
-//         debugger
-//         const $ = cheerio.load(html);
-//         console.log("🚀 ~ fetchTokensContent ~ $:", $)
-
-
-//         const tokenIdTds = $('td').filter((index, element) => {
-//             console.log("🚀 ~ tokenIdTds ~ element:", element)
-//             const href = $(element).find('a').attr('href');
-//             return href && href.startsWith('/nft/');
-//         });
-//         // Extract the token IDs from the href attribute of the <a> tags
-//         const tokenIds = tokenIdTds.map((index, element) => {
-//             const href = $(element).find('a').attr('href') || '';
-//             const tokenId = href.split('/').pop() || ''; // Get the last part after the last '/'
-//             return parseInt(tokenId, 10); // Convert the token ID to a number
-//         }).get(); // Convert the Cheerio object to a plain array
-
-//         console.log(tokenIds); // 
-
-//         return tokenIds;
-//     } catch (err) {
-//         console.error("Error fetching tokens content:", err);
-//         return [];
-//     }
-// };

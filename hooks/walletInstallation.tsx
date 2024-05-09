@@ -12,9 +12,7 @@ export function WalletInstallation() {
   //   const { connect } = useConnect();
   //   const { disconnect } = useDisconnect();
   //   const { switchNetwork } = useSwitchNetwork();
-  useEffect(() => {
-    initWalletClient();
-  });
+
   const initWalletClient = useCallback(() => {
     const browserWeb3Provider =
       typeof window !== "undefined" ? window.ethereum : null;
@@ -36,6 +34,9 @@ export function WalletInstallation() {
     });
     setTokenBoundClient(tokenBoundClient);
   }, [setTokenBoundClient, setWalletClient, address]);
+  useEffect(() => {
+    initWalletClient();
+  }, [initWalletClient]);
 
   return <></>;
 }

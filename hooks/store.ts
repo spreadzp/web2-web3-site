@@ -39,6 +39,8 @@ interface ITbaSite {
   setWalletClient: (client: WalletClient) => void;
   TBAccount: TBAccountParams;
   setTBAccount: (TBAccount: TBAccountParams) => void;
+  retrievedAccount: string;
+  setRetrievedAccount: (account: string) => void;
 }
 
 type Nft = {
@@ -69,5 +71,6 @@ export const useTbaSiteStore = create<ITbaSite>((set) => ({
   setWalletClient: (client: WalletClient) => set({ walletClient: client }),
   TBAccount: {} as TBAccountParams,
   setTBAccount: (TBAccount: TBAccountParams) => set({ TBAccount: TBAccount }),
-
+  retrievedAccount: "",
+  setRetrievedAccount: (account: string) => set({ retrievedAccount: account }),
 }));

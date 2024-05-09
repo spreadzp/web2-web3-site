@@ -1,38 +1,34 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
-import type { TableData } from '../interfaces/components.itypes';
-import Table from './Table';
-import { getIconByName } from './Icons';
 import { Tooltip } from 'react-tooltip';
 import type { TBAccountParams } from '@tokenbound/sdk';
-import { useTbaSiteStore, type Balance } from '../hooks/store';
+import { useTbaSiteStore } from '../hooks/store';
 import { useAccount } from 'wagmi';
 import { createPublicClient, createWalletClient, custom } from 'viem';
 import { bscTestnet } from 'viem/chains';
 import { getFullBalance } from '../hooks/parserScan';
-import * as ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/artifacts/AccountRegistry.json";
+import ACCOUNT_REGISTRY_CONTRACT from "../app/ABIs/artifacts/AccountRegistry.json";
+import { RenderBalances } from './RenderBalances';
+import { TbaInfo } from './TbaInfo';
 
 
 const TBA: React.FC = () => {
-    //const [url, setUrl] = useState('');
     const {
+        tbaBalance,
         setTbaBalance,
         publicClient,
         setPublicClient,
         walletClient,
         tokenBoundClient,
         TBAccount, setTBAccount,
-        setWalletClient
+        setWalletClient,
+        retrievedAccount, setRetrievedAccount
     } = useTbaSiteStore();
-
     const { address } = useAccount();
     const browserWeb3Provider =
         typeof window !== "undefined" ? window.ethereum : null;
 
-    const [retrievedAccount, setRetrievedAccount] = useState<string>("");
-
-    // eslint-disable-next-line
-    const [tokenId] = useState("2");
+    const [isCheckingBalance, setIsCheckingBalance] = useState(false)
     // eslint-disable-next-line
     //const [menu] = useState(initMenu);
     // eslint-disable-next-line
@@ -41,9 +37,8 @@ const TBA: React.FC = () => {
     );
     const DEFAULT_ACCOUNT: TBAccountParams = {
         tokenContract: tokenContract,
-        tokenId: tokenId,
+        tokenId: '2',
     };
-
 
     const [isTbaDeployed, setIsTbaDeployed] = useState(false);
     const [isTbaCreate, setIsTbaCreate] = useState(false);
@@ -55,13 +50,10 @@ const TBA: React.FC = () => {
         reason: "",
     });
 
-
     useEffect(() => {
         setTBAccount(DEFAULT_ACCOUNT);
         // eslint-disable-next-line
     }, []);
-
-    const [balance, setBalance] = useState<Balance | null>(null);
 
     const initPublicClient = useCallback(() => {
         const client = createPublicClient({
@@ -70,7 +62,7 @@ const TBA: React.FC = () => {
         });
         setPublicClient(client);
 
-    }, [browserWeb3Provider, setPublicClient,])
+    }, [browserWeb3Provider, setPublicClient])
 
 
     const initWalletClient = useCallback(() => {
@@ -99,7 +91,7 @@ const TBA: React.FC = () => {
     };
 
     const checkDeployTBAccount = useCallback(async () => {
-        if (TBAccount.tokenContract as `0x${string}`) {
+        if (TBAccount.tokenContract as `0x${string}` && tokenBoundClient) {
             if (!publicClient.readContract) {
                 initPublicClient();
             };
@@ -127,32 +119,35 @@ const TBA: React.FC = () => {
         } else {
             alert(`'Wrong address format!'${TBAccount.tokenContract}`);
         }
-    }, [TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, publicClient, initPublicClient]);
+    }, [TBAccount.tokenContract, TBAccount.tokenId, tokenBoundClient, publicClient, initPublicClient, setRetrievedAccount, setIsTbaDeployed, setIsTbaCreate]);
 
 
     const handleSubmit = useCallback(async () => {
         try {
             await checkDeployTBAccount()
             if (isTbaDeployed) {
-                console.log('walletClient?.chain', walletClient?.chain)
+                setIsCheckingBalance(true)
                 const balanceTba = await getFullBalance(
                     retrievedAccount as string,
                     walletClient?.chain?.blockExplorers?.etherscan.url as string,
 
                 ); //'https://testnet.bscscan.com/address/0xe3821b4Ab191d0E776b108Ea3bFb395286CB7010') 
-
-                if (balanceTba) {
-                    setTbaBalance(balanceTba);
-                    setBalance(balanceTba);
-                }
+                console.log("🚀 ~ handleSubmit ~ balanceTba:", balanceTba)
+                setTimeout(async () => {
+                    console.log('balanceTba')
+                    if (balanceTba) {
+                        setTbaBalance(balanceTba);
+                    }
+                }, 1000)
 
             }
-
         } catch (error) {
             setError({ isError: true, reason: JSON.stringify(error) });
             console.log("🚀 ~ getAccount ~ error:", error);
+        } finally {
+            setIsCheckingBalance(false)
         }
-    }, [checkDeployTBAccount, isTbaDeployed, retrievedAccount, walletClient?.chain, setTbaBalance, setBalance]);
+    }, [checkDeployTBAccount, isTbaDeployed, retrievedAccount, walletClient.chain, setTbaBalance]);
 
     const createAccount = useCallback(async () => {
         if (!tokenBoundClient || !address) return;
@@ -172,50 +167,18 @@ const TBA: React.FC = () => {
     const handleInput = (event: any, inputName: string) => {
         setTBAccount({ ...TBAccount, [inputName]: event.target.value });
     }
-    const renderLinkUri = (uri: string) => {
-        return (<a href={uri} target="_blank" rel="noopener noreferrer" className='text-blue-500'>Link</a>);
-    }
-    const renderBalanceTable = () => {
-        if (!balance) return null;
-        const coinData: TableData[] = [{ '#': 1, symbol: walletClient?.chain?.nativeCurrency.symbol || "ETH", amount: parseFloat(balance.ethBalance) }];
-        const tokenData: TableData[] = balance.erc20s.map((token, index) => ({
-            '#': index + 2,
-            address: token.contractAddress,
-            name: token.name,
-            amount: parseFloat(token.balance),
-        }));
-        const nftData: TableData[] = balance.erc721s.map((nft, index) => ({
-            '#': index + balance.erc20s.length + 2,
-            name: nft.name,
-            uri: renderLinkUri(nft.uri),
-            symbol: nft.symbol,
-            //nftId: nft.nftId,
-            nftMetadata: JSON.stringify(nft.symbol),
-        }));
 
-        return <div>
-            <div className="w-full text-center text-white font-bold mb-4">Balances for Tba account {retrievedAccount} </div>
-            <div className="w-full text-center text-white font-bold mb-4"> Created from contract {TBAccount.tokenContract} with nftId {TBAccount.tokenId}</div>
-            <div className="w-full text-center text-white font-bold mb-4">Balance in coins</div>
-            <Table data={coinData} />
-            <div className="w-full text-center text-white font-bold mb-4">Balance in tokens</div>
-            <Table data={tokenData} />
-            <div className="w-full text-center text-white font-bold mb-4">Balance in NFTs</div>
-            <Table data={nftData} />
-        </div>;
-
-    };
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#76004f] to-[#4b4fa6]">
             <div className="container mx-auto p-4">
-                {balance === null && (
+                {!tbaBalance.ethBalance && (
                     <div className="flex flex-col space-y-4 items-center">
                         <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 w-full md:w-1/2">
                             <label className="flex flex-col text-white w-full">
                                 NFT Contract Address:
                                 <input
                                     type="text"
-                                    value={TBAccount.tokenContract}
+                                    value={TBAccount.tokenContract || ''}
                                     onChange={(event) => handleInput(event, "tokenContract")}
                                     className="border border-gray-300 p-2 rounded text-black w-full"
                                     placeholder='0x0000000000000000000000000000000000000000'
@@ -227,7 +190,7 @@ const TBA: React.FC = () => {
                                     type="text"
                                     onChange={(event) => handleInput(event, "tokenId")}
 
-                                    value={TBAccount.tokenId}
+                                    value={TBAccount.tokenId || ''}
                                     className="border border-gray-300 p-2 rounded text-black w-full"
                                     placeholder='1'
                                 />
@@ -242,13 +205,15 @@ const TBA: React.FC = () => {
                                 {(TBAccount.tokenContract && TBAccount.tokenId) ? "Reset" : "Fill all inputs or reset"}
 
                             </button>}
-                            {TBAccount.tokenContract && TBAccount.tokenId && < button
-                                onClick={() => handleSubmit()}
-                                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                            >
-                                {!isTbaCreate && retrievedAccount ? "Check balance TBA" : "Check deployed TBA"}
-                            </button>}
+                            {TBAccount.tokenContract && TBAccount.tokenId && isCheckingBalance ?
+                                <button className=" banner flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded banner" >Checking balance...</button> : < button
+                                    onClick={() => handleSubmit()}
+                                    className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {!isTbaCreate && retrievedAccount ? "Check balance TBA" : "Check deployed TBA"}
+                                </button>}
                             {isTbaCreate && (
+
                                 <>
                                     <button className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded banner" onClick={() => createAccount()}>
                                         Create TBA
@@ -258,33 +223,16 @@ const TBA: React.FC = () => {
 
                         </div>
                         {isTbaCreate && (
-                            <div className="text-orange-300">
-                                <div  >Tba account {retrievedAccount} is not deployed yet </div>
-                                <div> for token {TBAccount.tokenContract} with tokenId {TBAccount.tokenId}</div>
-
-                            </div>
+                            <TbaInfo isDeployed={false} />
                         )}
                         {!isTbaCreate && retrievedAccount && (
-                            <div className="text-orange-300">
-                                <div>Tba account {retrievedAccount} is  deployed   </div>
-                                <div> for contract {TBAccount.tokenContract} with tokenId {TBAccount.tokenId}</div>
-                            </div>
+                            <TbaInfo isDeployed={true} />
                         )}
                     </div>
                 )
                 }
-                {balance && (
-                    <>
-                        <button
-                            onClick={() => setBalance(null)}
-                            data-tooltip-id="back-tooltip"
-                            data-tooltip-content={'Back to Inputs'}
-                            className="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            {getIconByName('Back')}
-                        </button>
-                        {renderBalanceTable()}
-                    </>
+                {tbaBalance.ethBalance && (
+                    <RenderBalances />
                 )}
 
                 <Tooltip id="back-tooltip" />

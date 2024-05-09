@@ -49,8 +49,5 @@
   },
   "engines": {
     "node": ">=18.17.0"
-  },
-  "browser": {
-    "./lib/adapters/http.js": false
   }
 }
